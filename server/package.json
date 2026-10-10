@@ -1,0 +1,26 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "MahalMate marriage and function hall booking API",
+  "main": "mahalmate.js",
+  "scripts": {
+    "start": "node mahalmate.js",
+    "dev": "node --watch mahalmate.js",
+    "create-admin": "node setup-admin.js",
+    "check": "node --check mahalmate.js && node --check setup-admin.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.6",
+    "express": "^5.2.1",
+    "express-mysql-session": "^3.0.3",
+    "express-session": "^1.19.0",
+    "fast-xml-parser": "^5.3.6",
+    "mysql2": "^3.24.5"
+  }
+}
