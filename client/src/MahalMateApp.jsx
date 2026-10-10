@@ -7,7 +7,7 @@ import {
 import {
   BrowserRouter, Link, Navigate, Route, Routes, useNavigate, useParams, useSearchParams,
 } from 'react-router-dom'
-import { api, xmlUrl } from './api.js'
+import { api, isStaticPreview, xmlUrl } from './api.js'
 import './MahalMate.css'
 
 const AuthContext = createContext(null)
@@ -76,7 +76,7 @@ function Header() {
       <nav className={open ? 'main-nav nav-open' : 'main-nav'} aria-label="Main navigation">
         <Link onClick={() => setOpen(false)} to="/">Home</Link>
         <Link onClick={() => setOpen(false)} to="/mahals">Explore mahals</Link>
-        <a onClick={() => setOpen(false)} href="/#functions">Functions</a>
+        <a onClick={() => setOpen(false)} href={`${import.meta.env.BASE_URL}#functions`}>Functions</a>
         {user && <Link onClick={() => setOpen(false)} to={user.role === 'admin' ? '/admin' : '/dashboard'}>{user.role === 'admin' ? 'Admin' : 'My bookings'}</Link>}
       </nav>
       <div className="header-actions">
@@ -98,7 +98,7 @@ function Footer() {
       <div className="footer-main">
         <Link to="/" className="brand footer-brand"><span className="brand-icon"><Flower2 size={21} /></span><span>Mahal<span>Mate</span><small>CELEBRATIONS, THOUGHTFULLY PLANNED</small></span></Link>
         <p>Thoughtful spaces for life's most meaningful gatherings.</p>
-        <div className="footer-links"><Link to="/mahals">Find a mahal</Link><a href="/#how-it-works">How it works</a><a href="/#contact">Contact</a></div>
+        <div className="footer-links"><Link to="/mahals">Find a mahal</Link><a href={`${import.meta.env.BASE_URL}#how-it-works`}>How it works</a><a href={`${import.meta.env.BASE_URL}#contact`}>Contact</a></div>
       </div>
       <div className="footer-bottom"><span>© {CURRENT_YEAR} MahalMate</span><span>Sample listings are for demonstration only. No payment is collected on this website.</span></div>
     </footer>
@@ -693,6 +693,7 @@ function AppFrame() {
   }, [setLoading, setUser])
   return <>
     <Header />
+    {isStaticPreview && <aside className="pages-preview-notice" role="status">This GitHub Pages site hosts the frontend only. Venue data, accounts, bookings, and XML require a separately deployed Express API; no backend is connected to this preview.</aside>}
     <Flash message={fatalError} onClose={() => setFatalError('')} />
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -715,7 +716,7 @@ function AuthProvider() {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const value = useMemo(() => ({ user, setUser, loading, setLoading }), [user, loading])
-  return <AuthContext.Provider value={value}><BrowserRouter><AppFrame /></BrowserRouter></AuthContext.Provider>
+  return <AuthContext.Provider value={value}><BrowserRouter basename={import.meta.env.BASE_URL}><AppFrame /></BrowserRouter></AuthContext.Provider>
 }
 
 export default AuthProvider

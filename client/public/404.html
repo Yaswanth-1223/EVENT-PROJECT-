@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting to MahalMate</title>
+    <script>
+      const base = '/EVENT-PROJECT-/'
+      const path = window.location.pathname
+      const route = path.startsWith(base) ? path.slice(base.length) : ''
+      if (route && !route.split('/').some((segment) => segment.includes('.'))) {
+        sessionStorage.setItem('mahalmate-redirect', `${path}${window.location.search}${window.location.hash}`)
+        window.location.replace(base)
+      }
+    </script>
+  </head>
+  <body>
+    <p>Page not found. <a href="/EVENT-PROJECT-/">Return to MahalMate</a></p>
+  </body>
+</html>

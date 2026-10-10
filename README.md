@@ -64,3 +64,9 @@ npm run build
 ```
 
 Copy `server/.env.example` to `server/.env` only for a fresh setup. Preserve existing local credentials; never copy database passwords into frontend environment variables or commit `.env` files.
+
+## GitHub Pages
+
+The `EVENT-PROJECT-` repository deploys only the compiled frontend from `client/dist` with the GitHub Actions workflow in `.github/workflows/deploy-pages.yml`. In the repository settings, set **Pages → Build and deployment → Source** to **GitHub Actions**. Each push to `main` runs the frontend lint and production build before deployment.
+
+GitHub Pages serves static files only; it does not run the Express API or connect to MySQL. Without a deployed backend, the Pages site is a frontend preview and account, venue-data, booking, and XML features are unavailable. To connect a separately deployed API, configure the repository Actions variable `VITE_API_URL` to its public API origin and configure that API's CORS/session settings for the Pages origin. Never put database credentials or other secrets in `VITE_API_URL` or any frontend variable.
