@@ -27,7 +27,10 @@ const dbConfig = {
   queueLimit: 0,
 };
 const pool = mysql.createPool({ ...dbConfig, database: databaseName, dateStrings: ["DATE"] });
-const clientOrigin = process.env.CLIENT_ORIGIN || "http://localhost:5173";
+const clientOrigins = (process.env.CLIENT_ORIGIN || process.env.CLIENT_ORIGINS || "http://localhost:5173")
+  .split(",")
+  .map((origin) => origin.trim().replace(/\/$/, ""))
+  .filter(Boolean);
 const sessionSecret =
   process.env.SESSION_SECRET || crypto.randomBytes(48).toString("hex");
 const MySQLStore = MySQLStoreFactory(session);
@@ -43,7 +46,13 @@ const xmlBuilder = new XMLBuilder({ format: true, suppressEmptyNode: true });
 
 if (process.env.NODE_ENV === "production") app.set("trust proxy", 1);
 app.disable("x-powered-by");
-app.use(cors({ origin: clientOrigin, credentials: true }));
+app.use(cors({
+  origin(origin, callback) {
+    if (!origin || clientOrigins.includes(origin)) callback(null, true);
+    else callback(new Error("This origin is not allowed by CORS."));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: "1mb" }));
 app.use((req, res, next) => {
   if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) req.body = {};
@@ -58,12 +67,18 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: "lax",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
       secure: process.env.NODE_ENV === "production",
       maxAge: 24 * 60 * 60 * 1000,
     },
   }),
 );
+
+let schemaInitialization;
+app.use((req, res, next) => {
+  schemaInitialization ||= initializeSchema();
+  schemaInitialization.then(() => next()).catch(next);
+});
 
 class HttpError extends Error {
   constructor(status, message) {
@@ -946,12 +961,16 @@ app.use((error, req, res, next) => {
   return res.status(500).json({ error: "The server could not complete this request. Please try again." });
 });
 
-initializeSchema()
-  .then(() => {
-    app.listen(port, () => console.log(`MahalMate API listening on http://localhost:${port} (database: ${databaseName})`));
-  })
-  .catch((error) => {
-    console.error("MahalMate startup failed. Check that MySQL is running and the configured account can create/use the mahalmate database.");
-    console.error(error.message);
-    process.exitCode = 1;
-  });
+if (require.main === module) {
+  initializeSchema()
+    .then(() => {
+      app.listen(port, () => console.log(`MahalMate API listening on http://localhost:${port} (database: ${databaseName})`));
+    })
+    .catch((error) => {
+      console.error("MahalMate startup failed. Check that MySQL is running and the configured account can create/use the mahalmate database.");
+      console.error(error.message);
+      process.exitCode = 1;
+    });
+}
+
+module.exports = app;

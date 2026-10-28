@@ -1,10 +1,7 @@
-const API_BASE = import.meta.env.VITE_API_URL || ''
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 export const isStaticPreview = import.meta.env.PROD && !import.meta.env.VITE_API_URL
 
 export async function api(path, options = {}) {
-  if (isStaticPreview) {
-    throw new Error('The GitHub Pages preview has no connected backend. Venue data, accounts, bookings, and XML are unavailable until the Express API is deployed and configured.')
-  }
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
     ...options,
