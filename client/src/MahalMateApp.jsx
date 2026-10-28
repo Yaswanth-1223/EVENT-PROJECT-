@@ -7,7 +7,7 @@ import {
 import {
   BrowserRouter, Link, Navigate, Route, Routes, useNavigate, useParams, useSearchParams,
 } from 'react-router-dom'
-import { api, xmlUrl } from './api.js'
+import { api, isStaticPreview, xmlUrl } from './api.js'
 import './MahalMate.css'
 
 const AuthContext = createContext(null)
@@ -694,7 +694,7 @@ function AppFrame() {
   useEffect(() => {
     let active = true
     api('/api/auth/me').then(({ user: current }) => { if (active) setUser(current) })
-      .catch((err) => { if (active && err.status !== 401) setFatalError(err.message) })
+      .catch((err) => { if (active && !isStaticPreview && err.status !== 401) setFatalError(err.message) })
       .finally(() => { if (active) setLoading(false) })
     return () => { active = false }
   }, [setLoading, setUser])
