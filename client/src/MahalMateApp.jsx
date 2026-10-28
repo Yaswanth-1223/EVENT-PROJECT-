@@ -141,7 +141,6 @@ function HomePage() {
   const navigate = useNavigate()
   const [functions, setFunctions] = useState(previewFunctions.map((name, id) => ({ id: id + 1, name })))
   const [mahals, setMahals] = useState(previewMahals)
-  const [error, setError] = useState('')
   const [query, setQuery] = useState({ location: '', date: '', guests: '', function_id: '' })
   useEffect(() => {
     Promise.all([api('/api/functions'), api('/api/mahals?sort=price_asc')])
