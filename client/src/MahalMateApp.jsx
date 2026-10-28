@@ -7,7 +7,7 @@ import {
 import {
   BrowserRouter, Link, Navigate, Route, Routes, useNavigate, useParams, useSearchParams,
 } from 'react-router-dom'
-import { api, isStaticPreview, xmlUrl } from './api.js'
+import { api, xmlUrl } from './api.js'
 import './MahalMate.css'
 
 const AuthContext = createContext(null)
@@ -130,16 +130,23 @@ function MahalCard({ mahal }) {
   )
 }
 
+const previewFunctions = ['Wedding', 'Reception', 'Engagement', 'Birthday / Family Function']
+const previewMahals = [
+  { id: 1, name: '[Sample] Royal Courtyard Mahal', location: 'Chennai', capacity_min: 150, capacity_max: 800, base_price: 185000, price_type: 'booking', amenities: ['Bridal suite', 'In-house kitchen', 'Stage'], ac_available: 1, image_url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85' },
+  { id: 2, name: '[Sample] Saffron Leaf Convention Hall', location: 'Bengaluru', capacity_min: 100, capacity_max: 600, base_price: 145000, price_type: 'booking', amenities: ['Dining hall', 'Air conditioning', 'Lift'], ac_available: 1, image_url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85' },
+  { id: 3, name: '[Sample] Lotus Pavilion', location: 'Coimbatore', capacity_min: 80, capacity_max: 450, base_price: 98000, price_type: 'booking', amenities: ['Garden lawn', 'Kitchen', 'Stage'], ac_available: 1, image_url: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=1200&q=85' },
+]
+
 function HomePage() {
   const navigate = useNavigate()
-  const [functions, setFunctions] = useState([])
-  const [mahals, setMahals] = useState([])
+  const [functions, setFunctions] = useState(previewFunctions.map((name, id) => ({ id: id + 1, name })))
+  const [mahals, setMahals] = useState(previewMahals)
   const [error, setError] = useState('')
   const [query, setQuery] = useState({ location: '', date: '', guests: '', function_id: '' })
   useEffect(() => {
     Promise.all([api('/api/functions'), api('/api/mahals?sort=price_asc')])
       .then(([types, listings]) => { setFunctions(types); setMahals(listings.slice(0, 3)) })
-      .catch((err) => setError(err.message))
+      .catch(() => { setFunctions(previewFunctions.map((name, id) => ({ id: id + 1, name }))); setMahals(previewMahals) })
   }, [])
   function searchMahals(event) {
     event.preventDefault()
@@ -693,7 +700,6 @@ function AppFrame() {
   }, [setLoading, setUser])
   return <>
     <Header />
-    {isStaticPreview && <aside className="pages-preview-notice" role="status">This GitHub Pages site hosts the frontend only. Venue data, accounts, bookings, and XML require a separately deployed Express API; no backend is connected to this preview.</aside>}
     <Flash message={fatalError} onClose={() => setFatalError('')} />
     <Routes>
       <Route path="/" element={<HomePage />} />

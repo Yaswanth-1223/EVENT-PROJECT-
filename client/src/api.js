@@ -2,6 +2,9 @@ const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 export const isStaticPreview = import.meta.env.PROD && !import.meta.env.VITE_API_URL
 
 export async function api(path, options = {}) {
+  if (isStaticPreview) {
+    throw new Error('The online account service is not configured yet. Please try again later.')
+  }
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
     ...options,
