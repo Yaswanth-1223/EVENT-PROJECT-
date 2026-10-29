@@ -25,7 +25,13 @@ export async function api(path, options = {}) {
     return { user }
   }
   if (isStaticPreview) {
-    throw new Error('This action needs the online MahalMate service. Please try again later.')
+    if (path === '/api/bookings/my') return []
+    if (path === '/api/functions') return []
+    if (path === '/api/services') return []
+    if (path.startsWith('/api/mahals')) return []
+    if (path.startsWith('/api/bookings/')) return null
+    if (path.startsWith('/api/admin/')) return []
+    return null
   }
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
