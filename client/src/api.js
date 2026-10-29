@@ -2,8 +2,30 @@ const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
 export const isStaticPreview = import.meta.env.PROD && !import.meta.env.VITE_API_URL
 
 export async function api(path, options = {}) {
+  if (isStaticPreview && /^\/api\/auth\/(me|register|login|logout)$/.test(path)) {
+    if (path === '/api/auth/me') {
+      let user = null
+      try { user = JSON.parse(localStorage.getItem('mahalmate-preview-user') || 'null') } catch { user = null }
+      return { user }
+    }
+    if (path === '/api/auth/logout') {
+      localStorage.removeItem('mahalmate-preview-user')
+      return { message: 'Signed out.' }
+    }
+    const body = options.body ? JSON.parse(options.body) : {}
+    if (!body.email) throw new Error('Email address is required.')
+    const user = {
+      id: 1,
+      name: body.name || 'MahalMate Guest',
+      email: body.email,
+      phone: body.phone || '',
+      role: 'customer',
+    }
+    localStorage.setItem('mahalmate-preview-user', JSON.stringify(user))
+    return { user }
+  }
   if (isStaticPreview) {
-    throw new Error('The online account service is not configured yet. Please try again later.')
+    throw new Error('This action needs the online MahalMate service. Please try again later.')
   }
   const response = await fetch(`${API_BASE}${path}`, {
     credentials: 'include',
